@@ -1240,24 +1240,44 @@
 
     }
 
-    // Поддержка мобильных платформ
+    // Поддержка мобильных платформ и адаптация под устройства
     function getMobileOS() {
-      const ua = navigator.userAgent;
+      const ua = navigator.userAgent || '';
+      const platform = navigator.platform || '';
+
       if (/android/i.test(ua)) return 'Android';
-      if (/iPad|iPhone|iPod/.test(ua)) return 'iOS';
-      return 'Unknown';
+      if (/iPhone|iPad|iPod/i.test(ua)) return 'iOS';
+      if (/Windows Phone/i.test(ua)) return 'WindowsPhone';
+      if (/Mac/i.test(platform) && navigator.maxTouchPoints > 0) return 'iOS';
+
+      return 'Desktop';
     }
 
-    // Адаптивная оптимизация для мобильных
-    document.addEventListener('DOMContentLoaded', function() {
+    function isMobileViewport() {
+      const hasTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+      return hasTouch && window.innerWidth <= 768;
+    }
+
+    function applyMobileOptimizations() {
       const os = getMobileOS();
+      const isMobile = isMobileViewport();
+
       document.documentElement.setAttribute('data-os', os);
-      
-      // Оптимизация размера шрифта для мобильных
-      if (os === 'Android' || os === 'iOS') {
-        document.documentElement.style.fontSize = 'clamp(14px, 4vw, 16px)';
+      document.documentElement.classList.toggle('is-mobile', isMobile);
+
+      if (isMobile) {
+        document.documentElement.style.fontSize = 'clamp(14px, 4.2vw, 16px)';
+      } else {
+        document.documentElement.style.fontSize = '';
       }
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+      applyMobileOptimizations();
     });
+
+    window.addEventListener('resize', applyMobileOptimizations);
+    window.addEventListener('orientationchange', applyMobileOptimizations);
 
   </script>
 
